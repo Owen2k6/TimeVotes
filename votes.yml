@@ -1,0 +1,11 @@
+types:
+  day:
+    votetime: 30
+    duration: 0
+    cooldown: 60
+    percentage: 45
+  rain:
+    votetime: 20
+    duration: 20
+    cooldown: 60
+    percentage: 60
