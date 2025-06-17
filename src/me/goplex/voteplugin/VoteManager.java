@@ -1,6 +1,7 @@
 package me.goplex.voteplugin;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -27,12 +28,12 @@ public class VoteManager {
         choice = choice.toLowerCase();
 
         if (!VoteConfig.voteTimes.containsKey(type)) {
-            player.sendMessage("§cInvalid vote type: §7" + type);
+            player.sendMessage(ChatColor.RED + "Invalid vote type: " + ChatColor.GRAY + type);
             return;
         }
 
         if (!choice.equals("yes") && !choice.equals("no")) {
-            player.sendMessage("§cInvalid choice. Use 'yes' or 'no'.");
+            player.sendMessage(ChatColor.RED + "Invalid choice. Use 'yes' or 'no'.");
             return;
         }
 
@@ -48,7 +49,7 @@ public class VoteManager {
                 int cooldownSeconds = VoteConfig.voteCoolDowns.getOrDefault(type, 0);
                 if ((now - lastVoteEndTime) < cooldownSeconds * 1000L) {
                     long timeLeft = (cooldownSeconds * 1000L - (now - lastVoteEndTime)) / 1000L;
-                    player.sendMessage("§cYou must wait §e" + timeLeft + " seconds §cbefore starting the vote §6" + type + "§c again.");
+                    player.sendMessage(ChatColor.RED + "You must wait " + ChatColor.YELLOW + timeLeft + " seconds" + ChatColor.RED + " before starting the vote " + ChatColor.GOLD + type + ChatColor.RED + " again.");
                     return;
                 }
             }
@@ -61,18 +62,18 @@ public class VoteManager {
             Set<String> voters = voteVoters.get(type);
 
             if (voters.contains(playerName)) {
-                player.sendMessage("§eYou have already voted for §6" + type + "§e.");
+                player.sendMessage(ChatColor.YELLOW + "You have already voted for " + ChatColor.GOLD + type + ChatColor.YELLOW + ".");
                 return;
             }
 
             voters.add(playerName);
             votes.add(choice.equals("yes"));
-            player.sendMessage("§aYour vote for §6" + type + " §ahas been recorded.");
+            player.sendMessage(ChatColor.YELLOW + "Your vote for " + ChatColor.GOLD + type + ChatColor.YELLOW + " has been recorded.");
             return;
         }
 
         if (!choice.equals("yes") && !choice.equals("")) {
-            player.sendMessage("§cOnly a 'yes' vote can start a vote.");
+            player.sendMessage(ChatColor.RED + "Only a 'yes' vote can start a vote.");
             return;
         }
 
@@ -82,7 +83,7 @@ public class VoteManager {
         voteChoices.put(type, new ArrayList<>(Collections.singletonList(true)));
         voteVoters.put(type, new HashSet<>(Collections.singleton(playerName)));
 
-        Bukkit.broadcastMessage("§aVote Started §7| §6" + type + "§e vote has started.");
+        Bukkit.broadcastMessage(ChatColor.GREEN + "Vote Started " + ChatColor.GRAY + "| " + ChatColor.GOLD + type + ChatColor.YELLOW + " vote has started.");
         startVoteTimer();
     }
 
@@ -119,27 +120,27 @@ public class VoteManager {
         voteVoters.remove(type);
 
         if (votes == null || votes.isEmpty()) {
-            Bukkit.broadcastMessage("§7No one voted on §6" + type + "§7.");
+            Bukkit.broadcastMessage(ChatColor.GRAY + "No one voted on " + ChatColor.GOLD + type + ChatColor.GRAY + ".");
             return;
         }
 
         long yesVotes = votes.stream().filter(v -> v).count();
         long totalVotes = votes.size();
         int requiredPercent = VoteConfig.votePercentages.getOrDefault(type, 50);
-        int actualPercent = (int)((yesVotes * 100.0f) / totalVotes);
+        int actualPercent = (int) ((yesVotes * 100.0f) / totalVotes);
 
-        Bukkit.broadcastMessage("§cVote Ended §7| §6" + type + " §chas ended.");
-        Bukkit.broadcastMessage("§7Votes Cast: §f" + totalVotes);
-        Bukkit.broadcastMessage("§7YES: §a" + yesVotes + " §7NO: §c" + (totalVotes - yesVotes));
-        Bukkit.broadcastMessage("§7Required: §e" + requiredPercent + "% §7- Reached: §e" + actualPercent + "%");
+        Bukkit.broadcastMessage(ChatColor.RED + "Vote Ended" + ChatColor.GRAY + " | " + ChatColor.RED + type + ChatColor.RED + " has ended.");
+        Bukkit.broadcastMessage(ChatColor.GRAY + "Votes Cast: " + ChatColor.WHITE + totalVotes);
+        Bukkit.broadcastMessage(ChatColor.GRAY + "YES: " + ChatColor.GREEN + yesVotes + ChatColor.GRAY + " NO: " + ChatColor.RED + (totalVotes - yesVotes));
+        Bukkit.broadcastMessage(ChatColor.GRAY + "Required: " + ChatColor.YELLOW + requiredPercent + "%" + ChatColor.GRAY + "- Reached: " + ChatColor.YELLOW + actualPercent + "%");
 
         voteCooldowns.get(type).put(type, System.currentTimeMillis());
 
         if (actualPercent >= requiredPercent) {
-            Bukkit.broadcastMessage("§aVote for §6" + type + " §ahas PASSED.");
+            Bukkit.broadcastMessage(ChatColor.GREEN + "Vote for " + ChatColor.GOLD + type + ChatColor.GREEN + " has PASSED.");
             applyEffect(type, durations.remove(type));
         } else {
-            Bukkit.broadcastMessage("§cVote for §6" + type + " §chas FAILED.");
+            Bukkit.broadcastMessage(ChatColor.RED + "Vote for " + ChatColor.GOLD + type + ChatColor.RED + " has FAILED.");
         }
     }
 
@@ -164,7 +165,7 @@ public class VoteManager {
 
         if (activeVotes.containsKey(type)) {
             int time = activeVotes.get(type);
-            player.sendMessage("§bTime left for §6" + type + " §8: §e" + time + " seconds.");
+            player.sendMessage(ChatColor.BLUE + "Time left for " + ChatColor.GOLD + type + ChatColor.DARK_GRAY + " : " + ChatColor.YELLOW + time + " seconds.");
         } else if (voteCooldowns.containsKey(type) && voteCooldowns.get(type).containsKey("__global__")) {
             long last = voteCooldowns.get(type).get("__global__");
             int cooldownSeconds = VoteConfig.voteCoolDowns.getOrDefault(type, 0);
@@ -172,15 +173,14 @@ public class VoteManager {
             long timeLeft = (expiresAt - now) / 1000L;
 
             if (timeLeft > 0) {
-                player.sendMessage("§7The topic §6" + type + " §7is on cooldown for §e" + timeLeft + "§7 more seconds.");
+                player.sendMessage(ChatColor.GRAY + "The topic " + ChatColor.GOLD + type + ChatColor.GRAY + " is on cooldown for " + ChatColor.YELLOW + timeLeft + ChatColor.GRAY + " more seconds.");
             } else {
-                player.sendMessage("§7There is no active vote for §6" + type + "§7.");
+                player.sendMessage(ChatColor.GRAY + "There is no active vote for " + ChatColor.GOLD + type + ChatColor.GRAY + ".");
             }
         } else {
-            player.sendMessage("§7There is no active vote for §6" + type + "§7.");
+            player.sendMessage(ChatColor.GRAY + "There is no active vote for " + ChatColor.GOLD + type + ChatColor.GRAY + ".");
         }
     }
 
-    
-    
+
 }

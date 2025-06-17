@@ -2,7 +2,10 @@ name: VotePlugin
 main: me.goplex.voteplugin.VotePlugin
 version: 1.0
 description: Allows players to vote on things in-game.
-author: goplex
+authors: [
+- ItsVollx
+- Owen2k6
+]
 commands:
   vote:
     description: Cast or check a vote
